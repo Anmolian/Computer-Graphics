@@ -1,114 +1,129 @@
-#ifdef _APPLE_
+#include<windows.h>
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include<cmath>
+
+#include <stdlib.h>
 #include<iostream>
-#include<stdlib.h>
+#include<cmath>
 using namespace std;
 
+// Algo 1- Drawing circle using Circle Equation (Polynomial Method)
 
-// Algo 1 - Using Line Equation
-static void drawLineUsingEquation(void)
+static void drawCircleUsingEquation(void)
 {
-    int x1=50;
-    int y1=50;
-    int x2=400;
-    int y2=275;
-    glClear(GL_COLOR_BUFFER_BIT);
-    float m=(float((y2-y1))/(x2-x1));
-    float b=(y1-m*x1);
+    int x1=0,y1=100,r=100;
     glBegin(GL_POINTS);
+        while(x1<y1){
+        y1=floor(0.5+sqrt(float(r*r)-float(x1*x1)));
         glVertex2i(x1,y1);
-        if(m<=1){
-            for(int i=x1+1;i<=x2;i++){
-                glVertex2i(i,floor(0.5f+(m*i+b)));
-            }
-        }else{
-            for(int i=y1+1;i<=y2;i++){
-                glVertex2i(floor(0.5f+((i-b)/m)),i);
-            }
-        }
+        glVertex2i(x1,-y1);
+        glVertex2i(-x1,-y1);
+        glVertex2i(-x1,y1);
+        glVertex2i(y1,x1);
+        glVertex2i(y1,-x1);
+        glVertex2i(-y1,-x1);
+        glVertex2i(-y1,x1);
+        x1++;
+    }
     glEnd();
     glFlush();
 }
 
-// Algo 2 - Using DDA (Digital Differential Analyzer)
-static void drawLineUsingDDA(void)
+// Algo 2- Drawing circle using Bresenham's Circle Drawing Algorithm
+
+static void drawCircleUsingBresenham(void)
 {
-    int x1=50;
-    int y1=50;
-    int x2=400;
-    int y2=275;
-    glClear(GL_COLOR_BUFFER_BIT);
-    float m=(float((y2-y1))/(x2-x1));
-    float b=(y1-m*x1);
+    int x1=0,y1=100,r=100;
+    int d=3-2*r;
     glBegin(GL_POINTS);
-        glVertex2i(x1,y1);
-        if(m<=1){
-            float prev=y1;
-            for(int i=x1+1;i<=x2;i++){
-                // y2=y1+m
-                glVertex2i(i,floor(0.5f+prev+m));
-                prev=prev+m;
-            }
+
+    glVertex2i(x1,y1);
+        glVertex2i(x1,-y1);
+        glVertex2i(-x1,-y1);
+        glVertex2i(-x1,y1);
+        glVertex2i(y1,x1);
+        glVertex2i(y1,-x1);
+        glVertex2i(-y1,-x1);
+        glVertex2i(-y1,x1);
+
+    while(x1<y1){
+        x1++;
+        if(d<0){
+            y1=y1;
+            d=d+4*x1+6;
         }else{
-            float prev=x1;
-            for(int i=y1+1;i<=y2;i++){
-                // x2=x1+(1/m)
-                glVertex2i(floor(0.5f+prev+(1/m)),i);
-                prev=prev+(1.0f/m);
-            }
+            y1=y1-1;
+            d=d+4*(x1-y1)+10;
         }
+
+        glVertex2i(x1,y1);
+        glVertex2i(x1,-y1);
+        glVertex2i(-x1,-y1);
+        glVertex2i(-x1,y1);
+        glVertex2i(y1,x1);
+        glVertex2i(y1,-x1);
+        glVertex2i(-y1,-x1);
+        glVertex2i(-y1,x1);
+    }
     glEnd();
     glFlush();
 }
 
-// Algo 3 - Using Bresenham
-static void drawLineUsingBresenham(void)
-{
-    int x1=50;
-    int y1=50;
-    int x2=400;
-    int y2=275;
-    glClear(GL_COLOR_BUFFER_BIT);
-    int dx=x2-x1;
-    int dy=y2-y1;
-    float m=(float(dy)/dx);
-    glBegin(GL_POINTS);
-        glVertex2i(x1,y1);
-        if(m<=1){
-            int decisionParameter=(2*dy)-dx;
-            int prev=y1;
-            for(int i=x1+1;i<=x2;i++){
-                if(decisionParameter>=0){
-                    decisionParameter=decisionParameter+((dy-dx)>>1);
-                    prev=prev+1;
-                }else{
-                    decisionParameter=decisionParameter+((dy)>>1);
-                }
-                glVertex2i(i,prev);
-            }
-        }else{
+//Algo 3- Drawing circle using Midpoint Circle Drawing Algorithm
 
+static void drawCircleUsingMidpoint(void)
+{
+
+    int x1=0,y1=100,r=100;
+    float d=(5.0f/4.0f)-r;
+    glBegin(GL_POINTS);
+
+    glVertex2i(x1,y1);
+        glVertex2i(x1,-y1);
+        glVertex2i(-x1,-y1);
+        glVertex2i(-x1,y1);
+        glVertex2i(y1,x1);
+        glVertex2i(y1,-x1);
+        glVertex2i(-y1,-x1);
+        glVertex2i(-y1,x1);
+
+    while(x1<y1){
+        x1++;
+        if(d<0){
+            y1=y1;
+            d=d+2*x1+3;
+        }else{
+            y1=y1-1;
+            d=d+2*(x1-y1)+4;
         }
+
+        glVertex2i(x1,y1);
+        glVertex2i(x1,-y1);
+        glVertex2i(-x1,-y1);
+        glVertex2i(-x1,y1);
+        glVertex2i(y1,x1);
+        glVertex2i(y1,-x1);
+        glVertex2i(-y1,-x1);
+        glVertex2i(-y1,x1);
+    }
     glEnd();
     glFlush();
 }
-
 
 void myInit(void){
     //Making background color Red as first
     // only Red argument is 1
-    //4th argument for opacity
-    glClearColor(0.0f,0.0f,0.0f,1.0f);
+    //4th argument for transparency
+    glClearColor(1.0f,0.0f,0.0f,1.0f);
 
     //Making picture color green (in RGB mode)
     glColor3f(0.0,1.0,0.0);
 
     //breadth of picture boundary is 1 pixel
-    glPointSize(3);
+    glPointSize(2);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
@@ -116,18 +131,17 @@ void myInit(void){
     gluOrtho2D(-780,780,-420,420);
 }
 
-
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(500,500);
     glutInitWindowPosition(200,100);
-    glutCreateWindow("Assignment 3");
+    glutCreateWindow("Circle Drawing");
     myInit();
-    //glutDisplayFunc(drawLineUsingEquation);
-    //glutDisplayFunc(drawLineUsingDDA);
-    glutDisplayFunc(drawLineUsingBresenham);
+    //glutDisplayFunc(drawCircleUsingEquation);
+    glutDisplayFunc(drawCircleUsingBresenham);
+    //glutDisplayFunc(drawCircleUsingMidpoint);
     glutMainLoop();
     return EXIT_SUCCESS;
 }
